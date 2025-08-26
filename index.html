@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Content Extractor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .examples {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-top: 5px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        button {
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: block;
+            margin: 30px auto;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            margin-top: 30px;
+        }
+        
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .result-content {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tag-name {
+            display: inline-block;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .tag-content {
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            overflow-x: auto;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loader-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            color: #e74c3c;
+            padding: 15px;
+            background-color: #fadbd8;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .success {
+            color: #27ae60;
+            padding: 15px;
+            background-color: #d5f4e6;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+            border-left: 4px solid #27ae60;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Web Content Extractor</h1>
+            <p class="description">Extract specific HTML elements from any webpage using BeautifulSoup</p>
+        </header>
+        
+        <div class="input-group">
+            <label for="url"><i class="fas fa-link"></i> Website URL</label>
+            <input type="text" id="url" placeholder="https://example.com">
+        </div>
+        
+        <div class="input-group">
+            <label for="tags"><i class="fas fa-code"></i> HTML Tags to Extract (comma separated)</label>
+            <input type="text" id="tags" placeholder="p, h1, a, img, .class-name, #id-name">
+            <p class="examples">Examples: p, h1, a, img, div.content, span.title, .class-name, #id-name</p>
+        </div>
+        
+        <button id="extract-btn"><i class="fas fa-download"></i> Extract Content</button>
+        
+        <div class="loader" id="loader">
+            <div class="loader-spinner"></div>
+            <p>Extracting content, please wait...</p>
+        </div>
+        
+        <div class="error" id="error-message"></div>
+        <div class="success" id="success-message"></div>
+        
+        <div class="results">
+            <h2><i class="fas fa-file-alt"></i> Extracted Content</h2>
+            <div class="result-content" id="result-content">
+                <p style="text-align: center; color: #7f8c8d; padding: 30px;">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #ddd;"></i>
+                    Your extracted content will appear here
+                </p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Note: This tool uses a backend service to extract content. Some websites may restrict access to their content.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const extractBtn = document.getElementById('extract-btn');
+            const urlInput = document.getElementById('url');
+            const tagsInput = document.getElementById('tags');
+            const resultContent = document.getElementById('result-content');
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('error-message');
+            const successMessage = document.getElementById('success-message');
+            
+            extractBtn.addEventListener('click', function() {
+                const url = urlInput.value.trim();
+                const tags = tagsInput.value.trim();
+                
+                // Reset messages
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+                
+                // Validate inputs
+                if (!url) {
+                    showError('Please enter a URL');
+                    return;
+                }
+                
+                if (!tags) {
+                    showError('Please specify at least one HTML tag to extract');
+                    return;
+                }
+                
+                // Validate URL format
+                try {
+                    new URL(url);
+                } catch (e) {
+                    showError('Please enter a valid URL');
+                    return;
+                }
+                
+                // Show loader
+                loader.style.display = 'block';
+                resultContent.innerHTML = '';
+                
+                // Make request to backend
+                fetch('/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        tags: tags.split(',').map(tag => tag.trim())
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error || `Server error: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loader.style.display = 'none';
+                    
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    
+                    if (data.results && data.results.length > 0) {
+                        showResults(data.results);
+                        showSuccess(`Successfully extracted ${data.results.length} elements`);
+                    } else {
+                        resultContent.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 30px;">No content found for the specified tags</p>';
+                        showError('No content found for the specified tags');
+                    }
+                })
+                .catch(error => {
+                    loader.style.display = 'none';
+                    showError('An error occurred while extracting content: ' + error.message);
+                });
+            });
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                
+                // Scroll to error message
+                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+            
+            function showSuccess(message) {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+            }
+            
+            function showResults(results) {
+                let html = '';
+                
+                results.forEach(item => {
+                    html += `<div class="result-item">`;
+                    html += `<span class="tag-name">${escapeHtml(item.tag)}</span>`;
+                    html += `<div class="tag-content">${escapeHtml(item.content)}</div>`;
+                    html += `</div>`;
+                });
+                
+                resultContent.innerHTML = html;
+            }
+            
+            function escapeHtml(unsafe) {
+                return unsafe
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+            
+            // Allow pressing Enter to submit
+            urlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') extractBtn.click();
+            });
+            
+            tagsInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') extractBtn.click();
+            });
+            
+            // Add some sample values for testing
+            urlInput.value = 'https://example.com';
+            tagsInput.value = 'h1, p, a';
+        });
+    </script>
+</body>
+</html>
